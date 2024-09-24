@@ -45,6 +45,13 @@ app.use(cors({
   allowedHeaders: 'Content-Type, Authorization' // Allow the required headers, including Authorization
 }));
 
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "https://edu-quest-silk.vercel.app"); // Specify your frontend domain
+  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization"); // Include Authorization header
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
