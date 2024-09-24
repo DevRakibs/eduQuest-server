@@ -15,31 +15,23 @@ const PORT = process.env.PORT || 5000;
 
 dotenv.config();
 
-const connectToDatabase = async () => {
-  try {
-    await mongoose.connect(process.env.DB_URI);
-    console.log('MongoDB connected');
-  } catch (error) {
-    console.error('Error connecting to MongoDB:', error.message);
-    process.exit(1);
+// Add this before any route definitions
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://edu-quest-silk.vercel.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', true);
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
   }
-};
-
-mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected');
+  next();
 });
 
-app.get('/', (req, res) => {
-  res.json({ message: 'Server is running' });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  connectToDatabase();
-});
-
-app.use(cors(corsOptions));
-app.use(express.json());
+// Replace the existing cors middleware with this
+app.use(cors({
+  origin: 'https://edu-quest-silk.vercel.app',
+  credentials: true
+}));
 
 // File upload configuration
 const storage = multer.memoryStorage();
