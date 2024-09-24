@@ -14,6 +14,29 @@ const PORT = process.env.PORT || 5000;
 
 dotenv.config();
 
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:4000',
+    'https://edu-quest-admin.vercel.app',
+    'https://edu-quest-silk.vercel.app'
+  ],
+  // credentials: true
+}));
+// Update the CORS middleware
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 const connectToDatabase = async () => {
   try {
     await mongoose.connect(process.env.DB_URI);
@@ -37,35 +60,12 @@ app.listen(PORT, () => {
   connectToDatabase();
 });
 
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:4000',
-    'https://edu-quest-admin.vercel.app',
-    'https://edu-quest-silk.vercel.app'
-  ],
-  // credentials: true
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
 // app.use((req, res, next) => {
 //   res.header('Access-Control-Allow-Origin', "*");
 //   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
 //   // res.header('Access-Control-Allow-Credentials', true);
 //   next();
 // });
-
-// Update the CORS middleware
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-  next();
-});
 
 // File upload configuration
 const storage = multer.memoryStorage();
