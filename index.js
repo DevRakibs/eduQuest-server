@@ -8,30 +8,53 @@ import multer from 'multer';
 import { blogRoute } from './route/blog.route.js';
 import { handleDelete, handleUpload } from './utils/fileUploadHandler.js';
 import { userRoute } from './route/user.route.js';
-import corsOptions from './config/corsOptions.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 dotenv.config();
 
-// Add this before any route definitions
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://edu-quest-silk.vercel.app');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', true);
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+const connectToDatabase = async () => {
+  try {
+    await mongoose.connect(process.env.DB_URI);
+    console.log('MongoDB connected');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error.message);
+    process.exit(1);
   }
-  next();
+};
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected');
 });
 
-// Replace the existing cors middleware with this
+app.get('/', (req, res) => {
+  res.json({ message: 'Server is running' });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  connectToDatabase();
+});
+
 app.use(cors({
-  origin: 'https://edu-quest-silk.vercel.app',
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:4000',
+    'https://edu-quest-admin.vercel.app',
+    'https://edu-quest-silk.vercel.app'
+  ],
   credentials: true
 }));
+app.use(express.json());
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // Allowing all origins
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  next();
+});
 
 // File upload configuration
 const storage = multer.memoryStorage();
