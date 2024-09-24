@@ -14,15 +14,15 @@ const PORT = process.env.PORT || 5000;
 
 dotenv.config();
 
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:4000',
-    'https://edu-quest-admin.vercel.app',
-    'https://edu-quest-silk.vercel.app'
-  ],
-  // credentials: true
-}));
+// app.use(cors({
+//   origin: [
+//     'http://localhost:3000',
+//     'http://localhost:4000',
+//     'https://edu-quest-admin.vercel.app',
+//     'https://edu-quest-silk.vercel.app'
+//   ],
+//   // credentials: true
+// }));
 // Update the CORS middleware
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
