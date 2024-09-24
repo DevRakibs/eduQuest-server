@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
@@ -14,26 +12,7 @@ const PORT = process.env.PORT || 5000;
 
 dotenv.config();
 
-// app.use(cors({
-//   origin: [
-//     'http://localhost:3000',
-//     'http://localhost:4000',
-//     'https://edu-quest-admin.vercel.app',
-//     'https://edu-quest-silk.vercel.app'
-//   ],
-//   // credentials: true
-// }));
-// Update the CORS middleware
-// app.use((req, res, next) => {
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-//   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-//   if (req.method === 'OPTIONS') {
-//     return res.status(200).end();
-//   }
-//   next();
-// });
-
+// Use CORS
 app.use(cors({
    origin: [
     'http://localhost:3000',
@@ -41,16 +20,11 @@ app.use(cors({
     'https://edu-quest-admin.vercel.app',
     'https://edu-quest-silk.vercel.app'
   ],
-  methods: 'GET,POST,PUT,DELETE', // Allow the required HTTP methods
-  allowedHeaders: 'Content-Type, Authorization' // Allow the required headers, including Authorization
+  methods: 'GET,POST,PUT,DELETE,OPTIONS', // Include OPTIONS
+  allowedHeaders: 'Content-Type, Authorization'
 }));
 
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://edu-quest-silk.vercel.app"); // Specify your frontend domain
-  res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization"); // Include Authorization header
-  next();
-});
+app.options('*', cors()); // Handle preflight requests
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -78,13 +52,6 @@ app.listen(PORT, () => {
   connectToDatabase();
 });
 
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', "*");
-//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-//   // res.header('Access-Control-Allow-Credentials', true);
-//   next();
-// });
-
 // File upload configuration
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -96,7 +63,7 @@ app.post('/api/file/upload', upload.single('my_file'), handleUpload);
 app.post('/api/file/delete', handleDelete);
 
 // Error handling middleware
-app.use((err, req, res,next) => {
+app.use((err, req, res, next) => {
   const status = err.status || 500;
   const message = err.message || 'Internal Server Error';
   res.status(status).send(message);
