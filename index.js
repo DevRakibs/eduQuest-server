@@ -15,10 +15,8 @@ dotenv.config();
 
 app.use(cookieParser());
 app.use(express.json());
-  app.use(cors({
-  origin: ['http://localhost:3000', 'https://edu-quest-silk.vercel.app'],
-  credentials: true,
-}));
+
+app.use(cors());
 
 const PORT = process.env.PORT || 5000;
 
