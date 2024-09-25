@@ -13,14 +13,7 @@ import cookieParser from 'cookie-parser';
 const app = express();
 dotenv.config();
 
-app.use(cookieParser());
-app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://edu-quest-silk.vercel.app'],
-  credentials: true,
-}));
 
 const PORT = process.env.PORT || 5000;
 
@@ -54,6 +47,24 @@ app.listen(PORT, () => {
 // File upload configuration
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://edu-quest-silk.vercel.app'],
+  credentials: true,
+}));
+
+app.use(express.json());
+app.use(cookieParser());
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  res.header('Access-Control-Allow-Credentials', true);
+  next();
+});
 
 // Routes
 app.use('/api/auth', userRoute);
