@@ -20,8 +20,11 @@ const corsOptions = {
   credentials: true, // If you are sending cookies or credentials
 };
 
-app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  cors(corsOptions)(req, res, next);
+});
 app.options('*', cors(corsOptions)); // Allow preflight requests for all routes
+app.use(express.json());
 
 
 const connectToDatabase = async () => {
@@ -55,7 +58,7 @@ const upload = multer({ storage });
 
 // Routes
 app.use('/api/auth', userRoute);
-app.use('/api/blog', blogRoute);
+// app.use('/api/blog', blogRoute);
 app.post('/api/file/upload', upload.single('my_file'), handleUpload);
 app.post('/api/file/delete', handleDelete);
 
