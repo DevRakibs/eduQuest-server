@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
@@ -13,36 +15,53 @@ const PORT = process.env.PORT || 5000;
 dotenv.config();
 
 // Use CORS
-app.use(cors({
-   origin: [
-    'http://localhost:3000',
+// app.use(cors({
+//    origin: [
+//     'http://localhost:3000',
+//     'http://localhost:4000',
+//     'https://edu-quest-admin.vercel.app',
+//     'https://edu-quest-silk.vercel.app'
+//   ],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true,
+//   optionsSuccessStatus: 204
+// }));
+
+app.use(cors({origin: [
+   'http://localhost:3000',
     'http://localhost:4000',
     'https://edu-quest-admin.vercel.app',
     'https://edu-quest-silk.vercel.app'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 204
-}));
-
-app.options('*', cors());
+], credentials: true}));
 
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  res.header('Access-Control-Allow-Credentials', true);
+  next();
+});
+
 
 const connectToDatabase = async () => {
   try {
     await mongoose.connect(process.env.DB_URI);
-    console.log('MongoDB connected');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
     process.exit(1);
   }
 };
 
+mongoose.connection.on('connected', () => {
+  console.log('mongodb connected');
+});
 mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected');
+  console.log('mongodb disconnected');
 });
 
 app.get('/', (req, res) => {
