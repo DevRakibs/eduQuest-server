@@ -28,24 +28,26 @@ dotenv.config();
 //   optionsSuccessStatus: 204
 // }));
 
-app.use(cors({origin: [
-   'http://localhost:3000',
-    'http://localhost:4000',
-    'https://edu-quest-admin.vercel.app',
-    'https://edu-quest-silk.vercel.app'
-],}));
+const allowedOrigins = [
+  'https://edu-quest-silk.vercel.app',
+  'https://edu-quest-admin.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:4000'
+];
 
-app.use(express.json());
-
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept'
-  );
-  res.header('Access-Control-Allow-Credentials', true);
-  next();
-});
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept', 'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date', 'X-Api-Version', 'Authorization'],
+  credentials: true
+}));
 
 
 const connectToDatabase = async () => {
