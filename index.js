@@ -20,9 +20,13 @@ app.use(cors({
     'https://edu-quest-admin.vercel.app',
     'https://edu-quest-silk.vercel.app'
   ],
-  methods: 'GET,POST,PUT,DELETE,OPTIONS', // Include OPTIONS
-  allowedHeaders: 'Content-Type, Authorization'
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 204
 }));
+
+app.options('*', cors());
 
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
