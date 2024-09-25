@@ -7,7 +7,7 @@
       "methods": ["GET", "OPTIONS","PATCH","DELETE","POST","PUT"],
       "headers": {
         "Access-Control-Allow-Methods": "GET,OPTIONS,PATCH,DELETE,POST,PUT",
-        "Access-Control-Allow-Origin": "https://edu-quest-admin.vercel.app, https://edu-quest-silk.vercel.app",
+        "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "Content-Type"
       }
     }
