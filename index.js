@@ -32,8 +32,8 @@ app.use(cors({origin: [
    'http://localhost:3000',
     'http://localhost:4000',
     'https://edu-quest-admin.vercel.app',
-    'https://edu-quest-silk.vercel.app/'
-], credentials: true}));
+    'https://edu-quest-silk.vercel.app'
+],}));
 
 app.use(express.json());
 
