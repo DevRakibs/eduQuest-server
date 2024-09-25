@@ -14,6 +14,42 @@ const PORT = process.env.PORT || 5000;
 
 dotenv.config();
 
+// Use CORS
+// app.use(cors({
+//    origin: [
+//     'http://localhost:3000',
+//     'http://localhost:4000',
+//     'https://edu-quest-admin.vercel.app',
+//     'https://edu-quest-silk.vercel.app'
+//   ],
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: true,
+//   optionsSuccessStatus: 204
+// }));
+
+const allowedOrigins = [
+  'https://edu-quest-silk.vercel.app',
+  'https://edu-quest-admin.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:4000'
+];
+
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      var msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['X-CSRF-Token', 'X-Requested-With', 'Accept', 'Accept-Version', 'Content-Length', 'Content-MD5', 'Content-Type', 'Date', 'X-Api-Version', 'Authorization'],
+  credentials: true
+}));
+
+
 const connectToDatabase = async () => {
   try {
     await mongoose.connect(process.env.DB_URI);
