@@ -49,7 +49,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://edu-quest-silk.vercel.app'],
+  origin: ['http://localhost:3000', 'https://eduquestlms.vercel.app/'],
   credentials: true,
 }));
 
