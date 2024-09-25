@@ -10,12 +10,13 @@ import { handleDelete, handleUpload } from './utils/fileUploadHandler.js';
 import { userRoute } from './route/user.route.js';
 
 const app = express();
+app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
 dotenv.config();
 
 const corsOptions = {
-  origin: ['http://localhost:3000', 'https://your-production-frontend.com'], // Allow localhost and production frontends
+  origin: ['localhost:3000', 'https://edu-quest-silk.vercel.app'], // Allow localhost and production frontends
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
   credentials: true, // If you are sending cookies or credentials
 };
@@ -24,7 +25,6 @@ app.use((req, res, next) => {
   cors(corsOptions)(req, res, next);
 });
 app.options('*', cors(corsOptions)); // Allow preflight requests for all routes
-app.use(express.json());
 
 
 const connectToDatabase = async () => {
