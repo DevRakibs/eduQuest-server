@@ -1,14 +1,9 @@
 {
   "builds": [{ "src": "*.js", "use": "@vercel/node" }],
   "routes": [
-    {
-      "src": "/(.*)",
-      "headers": {
-        "Access-Control-Allow-Origin": "https://edu-quest-silk.vercel.app", // Allow only your frontend domain
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS", // Include the HTTP methods you need
-        "Access-Control-Allow-Headers": "Authorization, Content-Type" // Allow required headers
-      },
-      "dest": "/"
-    }
-  ]
+   {
+     "src": "/(.*)",
+     "dest": "/"
+   }
+ ]
 }
