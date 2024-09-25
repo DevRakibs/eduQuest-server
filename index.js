@@ -17,6 +17,28 @@ app.use(express.urlencoded({ extended: false }));
 
 const PORT = process.env.PORT || 5000;
 
+// app.use(cors({
+//   origin: ['http://localhost:3000', 'https://eduquestlms.vercel.app'],
+//   credentials: true,
+// }));
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "DELETE", "PUT"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Cache-Control",
+      "Expires",
+      "Pragma",
+    ],
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+app.use(cookieParser());
 
 
 const connectToDatabase = async () => {
@@ -48,24 +70,7 @@ app.listen(PORT, () => {
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-app.use(cors({
-  origin: ['http://localhost:8000', 'https://eduquestlms.vercel.app'],
-  credentials: true,
-}));
 
-app.use(express.json());
-app.use(cookieParser());
-
-
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept'
-  );
-  res.header('Access-Control-Allow-Credentials', true);
-  next();
-});
 
 // Routes
 app.use('/api/auth', userRoute);
