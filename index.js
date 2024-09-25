@@ -8,31 +8,20 @@ import multer from 'multer';
 import { blogRoute } from './route/blog.route.js';
 import { handleDelete, handleUpload } from './utils/fileUploadHandler.js';
 import { userRoute } from './route/user.route.js';
+import cookieParser from 'cookie-parser';
 
 const app = express();
-app.use(express.json());
-const PORT = process.env.PORT || 5000;
-
 dotenv.config();
 
+app.use(cookieParser());
+app.use(express.json());
+  app.use(cors({
+  origin: ['http://localhost:3000', 'https://edu-quest-silk.vercel.app'],
+  credentials: true,
+}));
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000'); // Allow specific origin
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  next();
-});
+const PORT = process.env.PORT || 5000;
 
-const corsOptions = {
-  origin: ['localhost:3000', 'https://edu-quest-silk.vercel.app'], // Allow localhost and production frontends
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
-  credentials: true, // If you are sending cookies or credentials
-};
-
-app.use((req, res, next) => {
-  cors(corsOptions)(req, res, next);
-});
-app.options('*', cors(corsOptions)); // Allow preflight requests for all routes
 
 
 const connectToDatabase = async () => {
