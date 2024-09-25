@@ -14,6 +14,16 @@ const PORT = process.env.PORT || 5000;
 
 dotenv.config();
 
+const corsOptions = {
+  origin: ['http://localhost:3000', 'https://your-production-frontend.com'], // Allow localhost and production frontends
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
+  credentials: true, // If you are sending cookies or credentials
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Allow preflight requests for all routes
+
+
 const connectToDatabase = async () => {
   try {
     await mongoose.connect(process.env.DB_URI);
