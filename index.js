@@ -46,10 +46,11 @@ app.listen(PORT, () => {
 app.use(
   cors({
     origin: [
-      "http://localhost:3200",
-      "https://eduquestlms.vercel.app",
-      "https://edu-quest-admin.vercel.app",
-      "http://localhost:4000"],
+      'http://localhost:3200',
+      'https://eduquestlms.vercel.app',
+      'https://edu-quest-admin.vercel.app',
+      'http://localhost:4000'
+    ],
     // methods: ["GET", "POST", "DELETE", "PUT"],
     // allowedHeaders: [
     //   "Content-Type",
@@ -61,6 +62,8 @@ app.use(
     credentials: true,
   })
 );
+app.use(express.json());
+app.use(cookieParser());
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', req.headers.origin);
@@ -72,8 +75,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json());
-app.use(cookieParser());
 
 // File upload configuration
 const storage = multer.memoryStorage();
