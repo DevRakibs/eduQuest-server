@@ -24,7 +24,11 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: "http://localhost:3200",
+    origin: [
+      "http://localhost:3200",
+      "https://eduquestlms.vercel.app",
+      "https://edu-quest-admin.vercel.app",
+      "http://localhost:4000"],
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: [
       "Content-Type",
