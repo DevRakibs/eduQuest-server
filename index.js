@@ -43,39 +43,24 @@ app.listen(PORT, () => {
   connectToDatabase();
 });
 
-app.use(
-  cors()
-// app.use(
-//   cors({
-//     origin: [
-//       'http://localhost:3200',
-//       'https://eduquestlms.vercel.app',
-//       'https://edu-quest-admin.vercel.app',
-//       'http://localhost:4000'
-//     ],
-//     // methods: ["GET", "POST", "DELETE", "PUT"],
-//     // allowedHeaders: [
-//     //   "Content-Type",
-//     //   "Authorization",
-//     //   "Cache-Control",
-//     //   "Expires",
-//     //   "Pragma",
-//     // ],
-//     credentials: true,
-//   })
-);
+app.use(cors({origin: [
+  'http://localhost:3200',
+  'https://eduquestlms.vercel.app',
+  'https://edu-quest-admin.vercel.app',
+  'http://localhost:4000'
+], credentials: true}));
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use((req, res, next) => {
-//   res.header('Access-Control-Allow-Origin', req.headers.origin);
-//   res.header(
-//     'Access-Control-Allow-Headers',
-//     'Origin, X-Requested-With, Content-Type, Accept'
-//   );
-//   res.header('Access-Control-Allow-Credentials', true);
-//   next();
-// });
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  res.header('Access-Control-Allow-Credentials', true);
+  next();
+});
 
 
 // File upload configuration
