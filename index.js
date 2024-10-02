@@ -1,29 +1,30 @@
 /* eslint-disable no-unused-vars */
+/* eslint-disable no-useless-catch */
 /* eslint-disable no-undef */
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import multer from 'multer';
-import { blogRoute } from './route/blog.route.js';
-import { handleDelete, handleUpload } from './utils/fileUploadHandler.js';
-import { userRoute } from './route/user.route.js';
 import cookieParser from 'cookie-parser';
+import {v2 as cloudinary} from 'cloudinary';
+import Multer from 'multer';
+import { userRoute } from './route/user.route.js';
 
 const app = express();
+
 dotenv.config();
 
-app.use(express.urlencoded({ extended: false }));
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-const PORT = process.env.PORT || 5000;
-
-
-const connectToDatabase = async () => {
+const connect = async () => {
   try {
     await mongoose.connect(process.env.DB_URI);
   } catch (error) {
-    console.error('Error connecting to MongoDB:', error.message);
-    process.exit(1);
+    throw error;
   }
 };
 
@@ -35,13 +36,12 @@ mongoose.connection.on('disconnected', () => {
 });
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Server is running' });
+  res.json('server running');
 });
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  connectToDatabase();
+app.listen(5000, () => {
+  console.log('server running..');
 });
+connect();
 
 app.use(cors({origin: [
   'http://localhost:3200',
@@ -63,21 +63,55 @@ app.use((req, res, next) => {
 });
 
 
-// File upload configuration
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const storage = new Multer.memoryStorage();
+const upload = Multer({
+  storage,
+});
 
+async function handleUpload(file) {
+  const res = await cloudinary.uploader.upload(file, {
+    resource_type: "auto",
+    transformation: [
+      { quality: '50' }
+    ],
+  });
+  return res;
+}
 
+app.post("/api/upload", upload.single("my_file"), async (req, res) => {
+  try {
+    const b64 = Buffer.from(req.file.buffer).toString("base64");
+    let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    const cldres = await handleUpload(dataURI);
+    res.json(cldres);
+  } catch (error) {
+    console.log(error);
+    res.send({
+      message: error.message,
+    });
+  }
+});
 
-// Routes
+app.post('/api/delete', async (req, res) => {
+  try {
+    const { publicId } = req.body;
+    const result = await cloudinary.uploader.destroy(publicId);
+    if (result.result === 'ok') {
+      res.json({ success: true });
+    } else {
+      res.status(400).json({ success: false, message: 'Image deletion failed' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Something went wrong' });
+  }
+});
+
 app.use('/api/auth', userRoute);
-// app.use('/api/blog', blogRoute);
-app.post('/api/file/upload', upload.single('my_file'), handleUpload);
-app.post('/api/file/delete', handleDelete);
 
-// Error handling middleware
+
 app.use((err, req, res, next) => {
   const status = err.status || 500;
-  const message = err.message || 'Internal Server Error';
+  const message = err.message || 'Something went wrong!';
   res.status(status).send(message);
 });
