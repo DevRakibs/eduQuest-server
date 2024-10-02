@@ -15,8 +15,6 @@ dotenv.config();
 
 app.use(express.urlencoded({ extended: false }));
 
-const PORT = process.env.PORT || 5000;
-
 
 const connectToDatabase = async () => {
   try {
@@ -38,8 +36,8 @@ app.get('/', (req, res) => {
   res.json({ message: 'Server is running' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(5000, () => {
+  console.log('Server running on port 5000');
 });
 connectToDatabase();
 
