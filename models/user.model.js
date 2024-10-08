@@ -19,6 +19,9 @@ const UserSchema = new Schema(
     address: {
       type: String,
     },
+    about: {
+      type: String,
+    },
     email: {
       type: String,
       required: true,
@@ -29,7 +32,7 @@ const UserSchema = new Schema(
     phone: {
       type: Number,
     },
-    role: { type: String, enum: ['student', 'instructor'], default: '', required: true },
+    role: { type: String, enum: ['student', 'instructor', "admin"], default: '', required: true },
     password: {
       type: String,
       required: true

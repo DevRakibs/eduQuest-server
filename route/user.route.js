@@ -1,10 +1,28 @@
 import express from 'express';
-import { changePassword, deleteUser, forgotPassword, getLoggedUser, getUser, getUsers, handleLogin, handleReg, resendVerifyEmail, resetPassword, updateLoggedUser, updateUser, verifyEmail } from '../controller/user.controller.js';
+import {
+  adminCreateUser,
+  changePassword,
+  deleteUser,
+  forgotPassword,
+  getLoggedUser,
+  getUser,
+  getUsers,
+  handleLogin,
+  handleReg,
+  resendVerifyEmail,
+  resetPassword,
+  updateLoggedUser,
+  updateUser,
+  verifyEmail,
+} from '../controller/user.controller.js';
 import { verifyToken } from '../middlewere/verify.token.js';
+import { isAdmin } from '../middlewere/isAdmin.js';
 
 export const userRoute = express.Router();
 
 userRoute.post('/register', handleReg);
+
+userRoute.post('/admin-create-user', verifyToken, isAdmin, adminCreateUser);
 
 userRoute.post('/login', handleLogin);
 
@@ -15,7 +33,7 @@ userRoute.post('/resend-verify-email', resendVerifyEmail);
 userRoute.get('/me', verifyToken, getLoggedUser);
 
 userRoute.put('/user/edit/:id', verifyToken, updateUser);
-    
+
 userRoute.get('/users', verifyToken, getUsers);
 
 userRoute.get('/user/:id', verifyToken, getUser);

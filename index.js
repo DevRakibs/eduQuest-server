@@ -9,6 +9,9 @@ import { blogRoute } from './route/blog.route.js';
 import { handleDelete, handleUpload } from './utils/fileUploadHandler.js';
 import { userRoute } from './route/user.route.js';
 import cookieParser from 'cookie-parser';
+import { courseRoute } from './route/course.route.js';
+import { categoryRoute } from './route/category.route.js';
+import { instructorRoute } from './route/instructor.route.js';
 
 const app = express();
 dotenv.config();
@@ -58,6 +61,9 @@ const upload = multer({ storage });
 
 // Routes
 app.use('/api/auth', userRoute);
+app.use('/api/category', categoryRoute);
+app.use('/api/course', courseRoute);
+app.use('/api/instructor', instructorRoute);
 // app.use('/api/blog', blogRoute);
 app.post('/api/file/upload', upload.single('my_file'), handleUpload);
 app.post('/api/file/delete', handleDelete);

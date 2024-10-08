@@ -6,7 +6,7 @@ export const verifyToken = (req, res, next) => {
   const token = req.headers.authorization
 
   if (!token) {
-    return next(createError(401, 'unauthenticated'));
+    return next(createError(401, 'Unauthorized'));
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {

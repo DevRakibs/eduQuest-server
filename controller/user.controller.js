@@ -3,13 +3,19 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { sendVerificationEmail, sendPasswordResetEmail, sendPasswordResetConfirmationEmail } from '../utils/emailSend.js';
+import {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+  sendPasswordResetConfirmationEmail,
+  sendAdminUserCreateEmail,
+} from '../utils/emailSend.js';
 import { createError } from '../middlewere/error.handler.js';
 import userModel from '../models/user.model.js';
+import { generateRandomPassword } from '../utils/passwordUtils.js';
 
 // register user
 export const handleReg = async (req, res, next) => {
-  const {name, username, email,phone, password , role} = req.body;
+  const { name, username, email, phone, password, role } = req.body;
 
   if (!username || !email || !password) {
     return next(createError(400, 'All fields are required!'));
@@ -40,7 +46,7 @@ export const handleReg = async (req, res, next) => {
       role,
       password: hashedPassword,
       verificationToken,
-      verificationTokenExpiry
+      verificationTokenExpiry,
     });
 
     await newUser.save();
@@ -48,9 +54,78 @@ export const handleReg = async (req, res, next) => {
     await sendVerificationEmail(newUser.email, verificationToken);
 
     res.status(201).send({
-      message: 'Registration complete! Please check your email to verify your account.',
-      success: true
+      message:
+        'Registration complete! Please check your email to verify your account.',
+      success: true,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Admin creates a user (student or instructor)
+export const adminCreateUser = async (req, res, next) => {
+  const { name, username, email, phone, role, img } = req.body;
+
+  if (
+    !username ||
+    !email ||
+    !role ||
+    (role !== 'student' && role !== 'instructor')
+  ) {
+    return next(
+      createError(
+        400,
+        'All fields are required and role must be either student or instructor!'
+      )
+    );
+  }
+
+  try {
+    let user = await userModel.findOne({ username });
+    if (user) {
+      return next(createError(400, 'Username already exists!'));
+    }
+
+    user = await userModel.findOne({ email });
+    if (user) {
+      return next(createError(400, 'Email already exists!'));
+    }
+
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationTokenExpiry = Date.now() + 3600000; // 1 hour
+
+    const randomPassword = generateRandomPassword();
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(randomPassword, salt);
+
+    const newUser = new userModel({
+      name,
+      username,
+      email,
+      phone,
+      role,
+      address: '',
+      about: '',
+      img: '',
+      password: hashedPassword,
+      verificationToken,
+      verificationTokenExpiry,
+    });
+
+    await newUser.save();
+
+    await sendAdminUserCreateEmail(
+      newUser.email,
+      verificationToken,
+      randomPassword
+    );
+
+    res
+      .status(201)
+      .send(
+        'User created successfully. Verification email sent with login details.'
+      );
   } catch (error) {
     next(error);
   }
@@ -67,7 +142,7 @@ export const verifyEmail = async (req, res, next) => {
   try {
     const user = await userModel.findOne({
       verificationToken: token,
-      verificationTokenExpiry: { $gt: Date.now() }
+      verificationTokenExpiry: { $gt: Date.now() },
     });
 
     if (!user) {
@@ -85,7 +160,7 @@ export const verifyEmail = async (req, res, next) => {
   }
 };
 
-// resend verify email  
+// resend verify email
 export const resendVerifyEmail = async (req, res, next) => {
   const { email } = req.body;
 
@@ -129,14 +204,18 @@ export const handleLogin = async (req, res, next) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return next(createError(400, 'Incorrect Password'));
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     const { password: _, ...userDetails } = user._doc;
 
     res.status(200).send({
       jwt: token,
       message: 'Login successful.',
-      user: userDetails
+      user: userDetails,
     });
   } catch (error) {
     next(error);
@@ -154,7 +233,7 @@ export const getUsers = async (req, res, next) => {
       const searchRegex = new RegExp(search, 'i'); // Case-insensitive regex
       filter.$or = [
         { username: { $regex: searchRegex } },
-        { email: { $regex: searchRegex } }
+        { email: { $regex: searchRegex } },
       ];
     }
     res.status(200).json(usersWithOrders);
@@ -164,7 +243,7 @@ export const getUsers = async (req, res, next) => {
 };
 
 // get user by id
-export const getUser = async (req,res,next) => {
+export const getUser = async (req, res, next) => {
   try {
     const user = await userModel.findById(req.params.id);
     // const userOrders = await orderModel.find({userId: req.params.id})
@@ -173,12 +252,12 @@ export const getUser = async (req,res,next) => {
       // userOrders
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
 // get logged user info
-export const getLoggedUser = async (req,res,next) => {
+export const getLoggedUser = async (req, res, next) => {
   try {
     const user = await userModel.findById(req.user.id);
     const { password: _, ...userDetails } = user._doc;
@@ -186,13 +265,13 @@ export const getLoggedUser = async (req,res,next) => {
       ...user.toObject(),
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
 // update logged user
-export const updateLoggedUser = async (req, res,next) => {
-  const { name, phone, img,address } = req.body;
+export const updateLoggedUser = async (req, res, next) => {
+  const { name, phone, img, address } = req.body;
 
   try {
     const updatedUser = await userModel.findByIdAndUpdate(
@@ -212,43 +291,37 @@ export const updateLoggedUser = async (req, res,next) => {
 };
 
 // update user
-export const updateUser = async (req, res,next) => {
+export const updateUser = async (req, res, next) => {
   const { id } = req.params;
-  const { username, email, status } = req.body;
-
   try {
-    const updatedUser = await userModel.findByIdAndUpdate(
-      id,
-      { username, email, status },
-      { new: true, runValidators: true }
-    );
+    const updatedUser = await userModel.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
 
     if (!updatedUser) {
       return next(createError(404, 'User not found!'));
     }
 
-    res.status(200).send(updatedUser);
+    res.status(200).send('Updated Successfully');
   } catch (error) {
     next(error);
   }
 };
 
 // delete user
-export const deleteUser = async (req, res,next) => {
+export const deleteUser = async (req, res, next) => {
   const { id } = req.params;
 
   try {
     const deleteUser = await userModel.findByIdAndDelete(id);
 
     if (!deleteUser) {
-      return next(createError(404, 'User not found!'))
+      return next(createError(404, 'User not found!'));
     }
 
     return res.status(200).json({
       message: 'User deleted successfully',
     });
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
@@ -257,7 +330,9 @@ export const changePassword = async (req, res, next) => {
   const { currentPassword, newPassword } = req.body;
 
   if (!currentPassword || !newPassword) {
-    return next(createError(400, 'Current password and new password are required'));
+    return next(
+      createError(400, 'Current password and new password are required')
+    );
   }
 
   try {
@@ -278,7 +353,7 @@ export const changePassword = async (req, res, next) => {
     user.password = hashedNewPassword;
     await user.save();
 
-    res.status(200).send('Password changed successfully' );
+    res.status(200).send('Password changed successfully');
   } catch (error) {
     next(error);
   }
@@ -296,7 +371,10 @@ export const forgotPassword = async (req, res, next) => {
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
-    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
     user.resetPasswordExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     await user.save();
@@ -344,6 +422,3 @@ export const resetPassword = async (req, res, next) => {
     next(error);
   }
 };
-
-
-
