@@ -5,4 +5,5 @@ export const route = express.Router();
 
 route.get('/all', getInstructors);
 
+
 export { route as instructorRoute };

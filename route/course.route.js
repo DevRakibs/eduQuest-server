@@ -8,9 +8,8 @@ import {
   getAllCourses,
   getCourse,
   deleteCourse,
-  getInstructorCourses,
   enrollInCourse,
-  getEnrolledCourses,
+  getMyEnrolledCourses,
   getCourseByCategory,
   getCourseBySearch,
   getCourseByInstructor,
@@ -19,29 +18,63 @@ import {
   deleteReview,
   getPopularCourses,
   getRecentCourses,
-  getCoursesWithPagination
+  getCoursesWithPagination,
+  adminEnrollStudent,
+  getAllEnrolledCourses,
+  loggedInstructorRecentCourse,
+  loggedInstructorAllCourses,
+  editEnrollment,
+  cancelEnrollment,
 } from "../controller/course.controller.js";
 import { isAdmin } from "../middlewere/isAdmin.js";
 
 const router = express.Router();
 
+// create course  
 router.post('/create', verifyToken, createCourse);
+// update course
 router.put('/update/:id', verifyToken, updateCourse);
+// update course content
 router.put('/update-content/:id', verifyToken, updateCourseContent);
+// get all courses
 router.get('/all', getAllCourses);
+// get course by id
 router.get('/:id', getCourse);
-router.delete('/delete/:id', verifyToken,isAdmin, deleteCourse);
-router.get('/instructor/courses', verifyToken, getInstructorCourses);
+// delete course
+router.delete('/delete/:id', verifyToken, isAdmin, deleteCourse);
+// get all courses by instructor
+router.get('/instructor/all', verifyToken, loggedInstructorAllCourses);
+// get recent courses by instructor
+router.get('/instructor/recent', verifyToken, loggedInstructorRecentCourse);
+// enroll in course
 router.post('/enroll/:courseId', verifyToken, enrollInCourse);
-router.get('/enrolled/courses', verifyToken, getEnrolledCourses);
+// admin enroll student
+router.post('/admin/enroll', verifyToken, isAdmin, adminEnrollStudent);
+// edit enrollment
+router.put('/enrolled/edit', verifyToken, isAdmin, editEnrollment);
+// cancell enrollment
+router.post('/enrolled/cancel', verifyToken, isAdmin, cancelEnrollment);
+// get my enrolled courses
+router.get('/enrolled/all/me', verifyToken, getMyEnrolledCourses);
+// get all enrolled courses
+router.get('/enrolled/all', verifyToken, isAdmin, getAllEnrolledCourses);
+// get course by category
 router.get('/category/:categoryId', getCourseByCategory);
+// get course by search
 router.get('/search', getCourseBySearch);
+// get course by instructor
 router.get('/instructor/:instructorId', getCourseByInstructor);
-// router.post('/review/:id', verifyToken, addReviewToCourse);
+// add review to course
+router.post('/review/:id', verifyToken, addReviewToCourse);
+// update review
 // router.put('/review/:id', verifyToken, updateReview);
+// delete review
 // router.delete('/review/:id', verifyToken, deleteReview);
+// get popular courses
 // router.get('/popular', getPopularCourses);
-// router.get('/recent', getRecentCourses);
+// get recent courses
+router.get('/recent', getRecentCourses);
+// get courses with pagination
 // router.get('/paginated', getCoursesWithPagination);
 
 export { router as courseRoute };

@@ -317,9 +317,7 @@ export const deleteUser = async (req, res, next) => {
       return next(createError(404, 'User not found!'));
     }
 
-    return res.status(200).json({
-      message: 'User deleted successfully',
-    });
+    return res.status(200).send('User deleted successfully');
   } catch (error) {
     next(error);
   }
@@ -379,8 +377,7 @@ export const forgotPassword = async (req, res, next) => {
 
     await user.save();
 
-    // const resetUrl = `${req.protocol}://${req.get('host')}/password-reset/${resetToken}`;
-    const resetUrl = `http://localhost:3000/password-reset/${resetToken}`;
+    const resetUrl = `${process.env.FRONTEND_URL}/password-reset/${resetToken}`;
 
     await sendPasswordResetEmail(user.email, resetUrl);
 

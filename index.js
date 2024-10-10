@@ -12,6 +12,7 @@ import cookieParser from 'cookie-parser';
 import { courseRoute } from './route/course.route.js';
 import { categoryRoute } from './route/category.route.js';
 import { instructorRoute } from './route/instructor.route.js';
+import { studentRoute } from './route/student.route.js';
 
 const app = express();
 dotenv.config();
@@ -44,12 +45,14 @@ app.listen(5000, () => {
 });
 connectToDatabase();
 
-app.use(cors({origin: [
-  'http://localhost:3200',
-  'https://eduquestlms.vercel.app',
-  'https://edu-quest-admin.vercel.app',
-  'http://localhost:4000'
-], credentials: true}));
+app.use(cors({
+  origin: [
+    'http://localhost:3200',
+    'https://eduquestlms.vercel.app',
+    'https://edu-quest-admin.vercel.app',
+    'http://localhost:4000'
+  ], credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -64,6 +67,7 @@ app.use('/api/auth', userRoute);
 app.use('/api/category', categoryRoute);
 app.use('/api/course', courseRoute);
 app.use('/api/instructor', instructorRoute);
+app.use('/api/student', studentRoute);
 // app.use('/api/blog', blogRoute);
 app.post('/api/file/upload', upload.single('my_file'), handleUpload);
 app.post('/api/file/delete', handleDelete);

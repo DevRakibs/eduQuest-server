@@ -14,6 +14,13 @@ const sectionSchema = new mongoose.Schema({
   content: [contentSchema],
 });
 
+const enrollmentSchema = new mongoose.Schema({
+  student: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  paymentStatus: { type: String, enum: ['pending', 'confirmed'] },
+  enrollmentStatus: { type: String, enum: ['pending', 'approved'] },
+  enrolledAt: { type: Date, default: Date.now }
+});
+
 const courseSchema = new mongoose.Schema(
   {
     _id: { type: String, default: () => nanoid(6) },
@@ -24,7 +31,7 @@ const courseSchema = new mongoose.Schema(
     endDate: { type: Date, required: true },
     includes: [{ type: String, required: true }],
     cover: { type: String, required: true },
-    status: { type: String, enum: ['pending', 'active'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'active', 'inactive'], default: 'pending' },
     batchInfo: [
       {
         title: { type: String, required: true },
@@ -37,7 +44,7 @@ const courseSchema = new mongoose.Schema(
       required: true,
     },
     content: [sectionSchema],
-    studentsEnrolled: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    studentsEnrolled: [enrollmentSchema],
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',

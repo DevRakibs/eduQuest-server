@@ -40,7 +40,7 @@ userRoute.get('/user/:id', verifyToken, getUser);
 
 userRoute.put('/user/update', verifyToken, updateLoggedUser);
 
-userRoute.delete('/users/delete/:id', verifyToken, deleteUser);
+userRoute.delete('/user/delete/:id', verifyToken, isAdmin, deleteUser);
 
 userRoute.put('/change-password', verifyToken, changePassword);
 
