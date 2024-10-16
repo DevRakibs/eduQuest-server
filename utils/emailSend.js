@@ -19,6 +19,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// send verification email
 export const sendVerificationEmail = async (email, token) => {
   const templatePath = path.join(
     __dirname,
@@ -38,6 +39,7 @@ export const sendVerificationEmail = async (email, token) => {
   await transporter.sendMail(mailOptions);
 };
 
+// send admin user create email
 export const sendAdminUserCreateEmail = async (
   email,
   verificationToken,
@@ -97,6 +99,28 @@ export const sendPasswordResetConfirmationEmail = async (email) => {
     from: process.env.EMAIL,
     to: email,
     subject: 'Password Reset Successful',
+    html: htmlContent,
+  };
+
+  await transporter.sendMail(mailOptions);
+};
+
+// send course enrollment confirmation email
+export const sendCourseEnrollmentConfirmation = async (email, courseDetails) => {
+  const templatePath = path.join(
+    __dirname,
+    '../emailTemplate/courseEnrollment.html'
+  );
+  let htmlContent = fs.readFileSync(templatePath, 'utf8');
+
+  htmlContent = htmlContent.replace('{{courseName}}', courseDetails.title)
+    .replace('{{enrollmentStatus}}', courseDetails.enrollmentStatus)
+    .replace('{{paymentStatus}}', courseDetails.paymentStatus);
+
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: email,
+    subject: `Enrolled in ${courseDetails.title}`,
     html: htmlContent,
   };
 

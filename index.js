@@ -5,7 +5,6 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import multer from 'multer';
-import { blogRoute } from './route/blog.route.js';
 import { handleDelete, handleUpload } from './utils/fileUploadHandler.js';
 import { userRoute } from './route/user.route.js';
 import cookieParser from 'cookie-parser';
@@ -13,6 +12,8 @@ import { courseRoute } from './route/course.route.js';
 import { categoryRoute } from './route/category.route.js';
 import { instructorRoute } from './route/instructor.route.js';
 import { studentRoute } from './route/student.route.js';
+import { resourseRoute } from './route/resourse.route.js';
+import { blogRoute } from './route/blog.route.js';
 
 const app = express();
 dotenv.config();
@@ -47,7 +48,7 @@ connectToDatabase();
 
 app.use(cors({
   origin: [
-    'http://localhost:3200',
+    'http://localhost:3000',
     'https://eduquestlms.vercel.app',
     'https://edu-quest-admin.vercel.app',
     'http://localhost:4000'
@@ -68,7 +69,8 @@ app.use('/api/category', categoryRoute);
 app.use('/api/course', courseRoute);
 app.use('/api/instructor', instructorRoute);
 app.use('/api/student', studentRoute);
-// app.use('/api/blog', blogRoute);
+app.use('/api/resourse', resourseRoute);
+app.use('/api/blog', blogRoute);
 app.post('/api/file/upload', upload.single('my_file'), handleUpload);
 app.post('/api/file/delete', handleDelete);
 

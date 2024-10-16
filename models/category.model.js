@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { createError } from '../middlewere/error.handler.js';
+import { createError } from '../middleware/error.handler.js';
 
 const categorySchema = new mongoose.Schema(
   {

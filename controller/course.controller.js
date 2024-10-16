@@ -1,4 +1,7 @@
+import contentModel from '../models/content.model.js';
 import courseModel from '../models/course.model.js';
+import userModel from '../models/user.model.js';
+import { sendCourseEnrollmentConfirmation } from '../utils/emailSend.js';
 
 // create course
 export const createCourse = async (req, res, next) => {
@@ -16,11 +19,19 @@ export const createCourse = async (req, res, next) => {
 // update course
 export const updateCourse = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const course = await courseModel.findByIdAndUpdate(id, req.body, { new: true });
+    const { courseId } = req.params;
+    const course = await courseModel.findByIdAndUpdate(courseId, req.body, { new: true });
 
     if (!course) {
       return res.status(404).send('Course not found');
+    }
+
+    // If course status is 'inactive', update content status to 'archived'
+    if (course.status === 'inactive') {
+      await contentModel.findOneAndUpdate(
+        { courseId: course._id },
+        { status: 'archived' }
+      );
     }
 
     res.status(200).send('Course updated successfully');
@@ -29,20 +40,114 @@ export const updateCourse = async (req, res, next) => {
   }
 };
 
-// update course content
-export const updateCourseContent = async (req, res, next) => {
+// Create course content
+export const createCourseContent = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { content } = req.body;
-    const course = await courseModel.findByIdAndUpdate(
-      id,
-      { content },
-      { new: true }
-    );
+    const { courseId } = req.params;
+    const { sections, status } = req.body;
+    const course = await courseModel.findById(courseId);
     if (!course) {
       return res.status(404).send('Course not found');
     }
+
+    const courseContent = new contentModel({
+      courseId,
+      status,
+      sections
+    });
+
+    await courseContent.save();
+
+    course.content = courseContent._id;
+    await course.save();
+
+    res.status(201).send('Course content created successfully');
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get course content
+export const getCourseContent = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+    const courseContent = await contentModel.findOne({ courseId });
+    if (!courseContent) {
+      return res.status(404).send('Course content not found');
+    }
+
+    // Sort sections by order
+    courseContent.sections.sort((a, b) => a.order - b.order);
+
+    // Sort content within each section by order
+    courseContent.sections.forEach(section => {
+      section.content.sort((a, b) => a.order - b.order);
+    });
+
+    res.status(200).json(courseContent);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Update course content
+export const updateCourseContent = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+    const { sections, status } = req.body;
+
+    const course = await courseModel.findById(courseId);
+    if (!course) {
+      return res.status(404).send('Course not found');
+    }
+
+    const courseContent = await contentModel.findOneAndUpdate(
+      { courseId },
+      { status, sections },
+      { new: true, runValidators: true }
+    );
+
+    if (!courseContent) {
+      return res.status(404).send('Course content not found');
+    }
+
     res.status(200).send('Course content updated successfully');
+  } catch (err) {
+    next(err);
+  }
+};
+
+//delete course
+export const deleteCourse = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+    const course = await courseModel.findByIdAndDelete(courseId);
+    if (!course) {
+      return res.status(404).send('Course not found');
+    }
+
+    // Delete the associated course content
+    await contentModel.findOneAndDelete({ courseId });
+
+    res.status(200).send('Course and its content deleted successfully');
+  } catch (err) {
+    next(err);
+  }
+};
+
+//delete course content
+export const deleteCourseContent = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+    const courseContent = await contentModel.findOneAndDelete({ courseId });
+    if (!courseContent) {
+      return res.status(404).send('Course content not found');
+    }
+
+    // Update the course model to remove the content reference
+    await courseModel.findByIdAndUpdate(courseId, { $unset: { content: 1 } });
+
+    res.status(200).send('Course content deleted successfully');
   } catch (err) {
     next(err);
   }
@@ -51,11 +156,25 @@ export const updateCourseContent = async (req, res, next) => {
 // get all courses
 export const getAllCourses = async (req, res, next) => {
   try {
-    const courses = await courseModel.find()
+    const { search, category } = req.query;
+    let query = {};
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    if (category) {
+      query.category = category;
+    }
+
+    const courses = await courseModel.find(query)
       .populate('instructor')
       .populate('studentsEnrolled')
       .populate('category');
-    res.status(200).send(courses);
+
+    res.status(200).json(courses);
   } catch (err) {
     next(err);
   }
@@ -73,20 +192,6 @@ export const getCourse = async (req, res, next) => {
       return res.status(404).send('Course not found');
     }
     res.status(200).send(course);
-  } catch (err) {
-    next(err);
-  }
-};
-
-//delete course
-export const deleteCourse = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const course = await courseModel.findByIdAndDelete(id);
-    if (!course) {
-      return res.status(404).send('Course not found');
-    }
-    res.status(200).send('Course deleted successfully');
   } catch (err) {
     next(err);
   }
@@ -150,11 +255,23 @@ export const adminEnrollStudent = async (req, res, next) => {
     });
 
     await course.save();
-    res.status(200).send('Student enrolled in course successfully');
+
+    // Send confirmation email
+    const student = await userModel.findById(studentId);
+    if (student && student.email) {
+      await sendCourseEnrollmentConfirmation(student.email, {
+        title: course.title,
+        enrollmentStatus,
+        paymentStatus
+      });
+    }
+
+    res.status(200).send('Student enrolled in course successfully and confirmation email sent');
   } catch (err) {
     next(err);
   }
 };
+
 //edit enrollment
 export const editEnrollment = async (req, res, next) => {
   try {
@@ -200,7 +317,9 @@ export const cancelEnrollment = async (req, res, next) => {
 export const getMyEnrolledCourses = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const courses = await courseModel.find({ studentsEnrolled: userId });
+    const courses = await courseModel.find({ 'studentsEnrolled.student': userId })
+      .populate('instructor')
+      .populate('category')
     res.status(200).send(courses);
   } catch (err) {
     next(err);
@@ -388,6 +507,21 @@ export const loggedInstructorRecentCourse = async (req, res, next) => {
       .populate('category')
       .populate('instructor')
       .populate('studentsEnrolled')
+      .sort({ createdAt: -1 })
+      .limit(10);
+    res.status(200).send(courses);
+  } catch (err) {
+    next(err);
+  }
+};
+
+//logged student recent courses
+export const loggedStudentRecentCourse = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const courses = await courseModel.find({ 'studentsEnrolled.student': userId })
+      .populate('instructor')
+      .populate('category')
       .sort({ createdAt: -1 })
       .limit(10);
     res.status(200).send(courses);

@@ -9,7 +9,7 @@ import {
   sendPasswordResetConfirmationEmail,
   sendAdminUserCreateEmail,
 } from '../utils/emailSend.js';
-import { createError } from '../middlewere/error.handler.js';
+import { createError } from '../middleware/error.handler.js';
 import userModel from '../models/user.model.js';
 import { generateRandomPassword } from '../utils/passwordUtils.js';
 
@@ -294,6 +294,12 @@ export const updateLoggedUser = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   const { id } = req.params;
   try {
+    if (req.body.username) {
+      const user = await userModel.findOne({ username: req.body.username });
+      if (user) {
+        return next(createError(400, 'Username already exists'));
+      }
+    }
     const updatedUser = await userModel.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
 
     if (!updatedUser) {

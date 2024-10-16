@@ -1,29 +1,15 @@
 import mongoose from 'mongoose';
-import { customAlphabet } from 'nanoid';
-
-const nanoid = customAlphabet('1234567890', 10);
-
-const contentSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  description: { type: String },
-  url: { type: String, required: true },
-});
-
-const sectionSchema = new mongoose.Schema({
-  section: { type: String, required: true },
-  content: [contentSchema],
-});
 
 const enrollmentSchema = new mongoose.Schema({
   student: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  paymentStatus: { type: String, enum: ['pending', 'confirmed'] },
+  paymentStatus: { type: String, enum: ['unpaid', 'paid'] },
   enrollmentStatus: { type: String, enum: ['pending', 'approved'] },
   enrolledAt: { type: Date, default: Date.now }
 });
 
 const courseSchema = new mongoose.Schema(
   {
-    _id: { type: String, default: () => nanoid(6) },
+    // _id: { type: String, default: () => nanoid(6) },
     title: { type: String, required: true },
     description: { type: String },
     price: { type: Number, default: 0, required: true },
@@ -43,7 +29,10 @@ const courseSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    content: [sectionSchema],
+    content: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'CourseContent'
+    },
     studentsEnrolled: [enrollmentSchema],
     category: {
       type: mongoose.Schema.Types.ObjectId,
@@ -62,7 +51,10 @@ const courseSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true, _id: false }
+  {
+    timestamps: true,
+    // _id: false
+  }
 );
 
 export default mongoose.model('Course', courseSchema);

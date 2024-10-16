@@ -1,21 +1,28 @@
 import express from 'express';
 import {
   createBlog,
+  getAllBlogs,
   deleteBlog,
   getBlog,
-  getSingleBlog,
   updateBlog,
+  addComment,
+  addReply
 } from '../controller/blog.controller.js';
-import { verifyToken } from '../middlewere/verify.token.js';
+import { verifyToken } from '../middleware/verify.token.js';
+const router = express.Router();
 
-export const blogRoute = express.Router();
+router.post('/create', verifyToken, createBlog);
 
-blogRoute.post('/create', verifyToken, createBlog);
+router.get('/all', getAllBlogs);
 
-blogRoute.get('/getAll', getBlog);
+router.put('/edit/:blogId', verifyToken, updateBlog);
 
-blogRoute.put('/edit/:blogId',verifyToken, updateBlog);
+router.get('/single/:blogId', getBlog);
 
-blogRoute.get('/single/:blogId', getSingleBlog);
+router.delete('/delete/:blogId', verifyToken, deleteBlog);
 
-blogRoute.delete('/delete/:blogId',verifyToken, deleteBlog);
+router.post('/comment/:blogId', verifyToken, addComment);
+
+router.post('/reply/:blogId/:commentId', verifyToken, addReply);
+
+export { router as blogRoute };

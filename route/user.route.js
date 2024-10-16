@@ -15,8 +15,8 @@ import {
   updateUser,
   verifyEmail,
 } from '../controller/user.controller.js';
-import { verifyToken } from '../middlewere/verify.token.js';
-import { isAdmin } from '../middlewere/isAdmin.js';
+import { verifyToken } from '../middleware/verify.token.js';
+import { isAdmin } from '../middleware/isAdmin.js';
 
 export const userRoute = express.Router();
 
