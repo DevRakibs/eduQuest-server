@@ -170,7 +170,7 @@ export const getAllCourses = async (req, res, next) => {
     }
 
     const courses = await courseModel.find(query)
-      .populate('instructor')
+      .populate('instructor', '-password')
       .populate('studentsEnrolled')
       .populate('category');
 
@@ -185,7 +185,7 @@ export const getCourse = async (req, res, next) => {
   try {
     const { id } = req.params;
     const course = await courseModel.findById(id).
-      populate('instructor').
+      populate('instructor', '-password').
       populate('studentsEnrolled.student').
       populate('category');
     if (!course) {
@@ -203,7 +203,7 @@ export const loggedInstructorAllCourses = async (req, res, next) => {
     const instructorId = req.user.id;
     const courses = await courseModel.find({ instructor: instructorId })
       .populate('category')
-      .populate('instructor')
+      .populate('instructor', '-password')
       .populate('studentsEnrolled');
 
     res.status(200).send(courses);
@@ -318,7 +318,7 @@ export const getMyEnrolledCourses = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const courses = await courseModel.find({ 'studentsEnrolled.student': userId })
-      .populate('instructor')
+      .populate('instructor', '-password')
       .populate('category')
     res.status(200).send(courses);
   } catch (err) {
@@ -331,7 +331,7 @@ export const getMyEnrolledCourses = async (req, res, next) => {
 export const getAllEnrolledCourses = async (req, res, next) => {
   try {
     const courses = await courseModel.find({ 'studentsEnrolled.0': { $exists: true } })
-      .populate('instructor')
+      .populate('instructor', '-password')
       .populate('category')
       .populate('studentsEnrolled.student');
 

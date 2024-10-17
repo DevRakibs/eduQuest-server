@@ -16,7 +16,21 @@ export const createBlog = async (req, res, next) => {
 // Get all blogs
 export const getAllBlogs = async (req, res, next) => {
   try {
-    const blogs = await Blog.find().sort({ updatedAt: -1 }).populate('author');
+    const { category, search } = req.query;
+    let query = {};
+
+    if (category) {
+      query.category = category;
+    }
+
+    if (search) {
+      query.title = { $regex: search, $options: 'i' };
+    }
+
+    const blogs = await Blog.find(query)
+      .sort({ updatedAt: -1 })
+      .populate('author', '_id username email');
+
     res.status(200).send(blogs);
   } catch (error) {
     next(error);
@@ -27,7 +41,7 @@ export const getAllBlogs = async (req, res, next) => {
 export const getBlog = async (req, res, next) => {
   try {
     const { blogId } = req.params;
-    const blog = await Blog.findById(blogId).populate('comments.user comments.replies.user');
+    const blog = await Blog.findById(blogId).populate('author comments.user comments.replies.user');
     if (!blog) {
       return res.status(404).send('Blog not found');
     }

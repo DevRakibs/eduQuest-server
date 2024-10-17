@@ -17,7 +17,7 @@ router.get('/all', getAllBlogs);
 
 router.put('/edit/:blogId', verifyToken, updateBlog);
 
-router.get('/single/:blogId', getBlog);
+router.get('/details/:blogId', getBlog);
 
 router.delete('/delete/:blogId', verifyToken, deleteBlog);
 
