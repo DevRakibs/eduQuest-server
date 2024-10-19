@@ -72,7 +72,7 @@ router.get('/instructor/recent', verifyToken, loggedInstructorRecentCourse);
 // get recent enrolled courses by student
 router.get('/student/recent', verifyToken, loggedStudentRecentCourse);
 
-// enroll in course
+// enroll in course (not use)
 router.post('/enroll/:courseId', verifyToken, enrollInCourse);
 
 // admin enroll student
@@ -90,31 +90,31 @@ router.get('/enrolled/my', verifyToken, getMyEnrolledCourses);
 // get all enrolled courses
 router.get('/enrolled/all', verifyToken, isAdmin, getAllEnrolledCourses);
 
-// get course by category
+// get course by category (not use)
 router.get('/category/:categoryId', getCourseByCategory);
 
-// get course by search
+// get course by search (not use)
 router.get('/search', getCourseBySearch);
 
 // get course by instructor
 router.get('/instructor/:instructorId', getCourseByInstructor);
 
-// add review to course
+// add review to course (not use)
 router.post('/review/:id', verifyToken, addReviewToCourse);
 
-// update review
+// update review (not use)
 router.put('/review/:id', verifyToken, updateReview);
 
-// delete review
+// delete review (not use)
 router.delete('/review/:id', verifyToken, deleteReview);
 
-// get popular courses
+// get popular courses (not use)
 router.get('/popular', getPopularCourses);
 
-// get recent courses
+// get recent courses (not use)
 router.get('/recent', getRecentCourses);
 
-// get courses with pagination
+// get courses with pagination (not use)
 router.get('/paginated', getCoursesWithPagination);
 
 

@@ -127,59 +127,24 @@ export const sendCourseEnrollmentConfirmation = async (email, courseDetails) => 
   await transporter.sendMail(mailOptions);
 };
 
-// export const sendVerificationEmail = async (email, token) => {
-//   const mailOptions = {
-//     from: 'poshcoderbd@gmail.com',
-//     to: email,
-//     subject: 'Posh Coder Email Verification',
-//     text: `Please verify your email by clicking the following link:
-//     https://www.poshcoder.com/verify-email?token=${token}`
-//   };
+// send contact notification email to admin
+export const sendContactNotificationEmail = async (contactDetails) => {
+  const templatePath = path.join(
+    __dirname,
+    '../emailTemplate/contactNotificationTemplate.html'
+  );
+  let htmlContent = fs.readFileSync(templatePath, 'utf8');
 
-//   await transporter.sendMail(mailOptions);
-// };
+  htmlContent = htmlContent.replace('{{name}}', contactDetails.name)
+    .replace('{{email}}', contactDetails.email)
+    .replace('{{message}}', contactDetails.message);
 
-// // send order create email
-// export const sendOrderCreateEmail = async (orderDetails) => {
+  const mailOptions = {
+    from: process.env.EMAIL,
+    to: process.env.EMAIL,
+    subject: 'New Contact Form Submission',
+    html: htmlContent,
+  };
 
-//   const templatePath = path.resolve(__dirname, '../emailTemplate/orderCreateTemplate.html');
-//   let htmlContent = fs.readFileSync(templatePath, 'utf8');
-
-//   htmlContent = htmlContent.replace('{{orderName}}', orderDetails.orderName)
-//                            .replace('{{name}}', orderDetails.name)
-//                            .replace('{{phone}}', orderDetails.phone)
-//                            .replace('{{desc}}', orderDetails.desc)
-//                            .replace('{{status}}', orderDetails.status)
-//                            .replace('{{username}}', orderDetails.user.username)
-//                            .replace('{{email}}', orderDetails.user.email);
-
-//   const mailOptions = {
-//     from: 'poshcoderbd@gmail.com',
-//     to: 'poshcoderbd@gmail.com',
-//     subject: 'New Order Placed',
-//     html: htmlContent, // Use the HTML template
-//   };
-
-//   await transporter.sendMail(mailOptions);
-// };
-
-// send order confirmation to the user
-// export const sendUserOrderConfirmationEmail = async (orderDetails) => {
-//   const templatePath = path.resolve(__dirname, '../emailTemplate/userOrderConfirmationTemplate.html');
-//   let htmlContent = fs.readFileSync(templatePath, 'utf8');
-
-//   htmlContent = htmlContent.replace('{{name}}', orderDetails.name)
-//                            .replace('{{orderName}}', orderDetails.orderName)
-//                            .replace('{{status}}', orderDetails.status)
-//                            .replace('{{desc}}', orderDetails.desc)
-//                            .replace('{{phone}}', orderDetails.phone);
-
-//   const mailOptions = {
-//     from: 'poshcoderbd@gmail.com',
-//     to: orderDetails.user.email,
-//     subject: 'Your Order Confirmation',
-//     html: htmlContent
-//   };
-
-//   await transporter.sendMail(mailOptions);
-// };
+  await transporter.sendMail(mailOptions);
+};

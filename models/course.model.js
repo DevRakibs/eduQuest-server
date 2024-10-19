@@ -17,7 +17,7 @@ const courseSchema = new mongoose.Schema(
     endDate: { type: Date, required: true },
     includes: [{ type: String, required: true }],
     cover: { type: String, required: true },
-    status: { type: String, enum: ['pending', 'active', 'inactive'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'upcoming', 'running', 'completed', 'inactive'], default: 'pending' },
     batchInfo: [
       {
         title: { type: String, required: true },

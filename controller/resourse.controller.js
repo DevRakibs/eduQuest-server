@@ -11,14 +11,17 @@ export const createResourse = async (req, res, next) => {
 
 export const getResourses = async (req, res, next) => {
   try {
-    const { search, } = req.query;
+    const { search, category } = req.query;
     let query = {};
 
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } },
+        { name: { $regex: search, $options: 'i' } }
       ];
+    }
+
+    if (category) {
+      query.category = category;
     }
 
     const resourses = await Resourse.find(query);

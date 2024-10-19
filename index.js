@@ -14,6 +14,9 @@ import { instructorRoute } from './route/instructor.route.js';
 import { studentRoute } from './route/student.route.js';
 import { resourseRoute } from './route/resourse.route.js';
 import { blogRoute } from './route/blog.route.js';
+import { FAQRoute } from './route/FAQ.route.js';
+import { infoRouter } from './route/info.route.js';
+import { contactRoute } from './route/contact.route.js';
 
 const app = express();
 dotenv.config();
@@ -71,6 +74,9 @@ app.use('/api/instructor', instructorRoute);
 app.use('/api/student', studentRoute);
 app.use('/api/resourse', resourseRoute);
 app.use('/api/blog', blogRoute);
+app.use('/api/faq', FAQRoute);
+app.use('/api/info', infoRouter);
+app.use('/api/contact', contactRoute);
 app.post('/api/file/upload', upload.single('my_file'), handleUpload);
 app.post('/api/file/delete', handleDelete);
 
