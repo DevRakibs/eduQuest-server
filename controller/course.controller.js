@@ -156,7 +156,7 @@ export const deleteCourseContent = async (req, res, next) => {
 // get all courses
 export const getAllCourses = async (req, res, next) => {
   try {
-    const { search, category } = req.query;
+    const { search, category, filter } = req.query;
     let query = {};
 
     if (search) {
@@ -167,6 +167,10 @@ export const getAllCourses = async (req, res, next) => {
 
     if (category) {
       query.category = category;
+    }
+
+    if (filter) {
+      query.status = filter;
     }
 
     const courses = await courseModel.find(query)
