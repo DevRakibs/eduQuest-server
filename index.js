@@ -49,6 +49,8 @@ app.listen(5000, () => {
 });
 connectToDatabase();
 
+
+//allowed origin
 app.use(cors({
   origin: [
     'http://localhost:3000',
